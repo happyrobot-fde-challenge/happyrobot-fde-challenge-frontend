@@ -1,10 +1,22 @@
-import { categories, articles } from "../../_assets/content";
+import { categories } from "../../_assets/categories";
+import { articles } from "../../_assets/articles";
 import CardArticle from "../../_assets/components/CardArticle";
 import CardCategory from "../../_assets/components/CardCategory";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
+import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata({ params }) {
+export async function generateStaticParams() {
+  return categories.map((category) => ({
+    categoryId: category.slug,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { categoryId: string };
+}) {
   const category = categories.find(
     (category) => category.slug === params.categoryId
   );
@@ -16,7 +28,12 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Category({ params }) {
+export default async function Category({
+  params,
+}: {
+  params: { categoryId: string };
+}) {
+  const t = await getTranslations("blog");
   const category = categories.find(
     (category) => category.slug === params.categoryId
   );
@@ -24,7 +41,10 @@ export default async function Category({ params }) {
     .filter((article) =>
       article.categories.map((c) => c.slug).includes(category.slug)
     )
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    )
     .slice(0, 3);
 
   return (
@@ -40,7 +60,7 @@ export default async function Category({ params }) {
 
       <section className="mb-24">
         <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-center mb-8 md:mb-12">
-          Most recent articles in {category.title}
+          {t("mostRecentIn", { category: category.title })}
         </h2>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -57,7 +77,7 @@ export default async function Category({ params }) {
 
       <section>
         <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-center mb-8 md:mb-12">
-          Other categories you might like
+          {t("otherCategories")}
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

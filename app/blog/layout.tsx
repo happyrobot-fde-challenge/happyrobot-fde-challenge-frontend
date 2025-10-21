@@ -1,12 +1,12 @@
 import { Suspense } from "react";
-import HeaderBlog from "./_assets/components/HeaderBlog";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-export default async function LayoutBlog({ children }) {
+export default async function LayoutBlog({ children }: { children: any }) {
   return (
     <div>
       <Suspense>
-        <HeaderBlog />
+        <Header />
       </Suspense>
 
       <main className="min-h-screen max-w-6xl mx-auto p-8">{children}</main>

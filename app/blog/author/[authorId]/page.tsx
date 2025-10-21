@@ -1,10 +1,22 @@
 import Image from "next/image";
-import { authors, articles } from "../../_assets/content";
+import { authors } from "../../_assets/authors";
+import { articles } from "../../_assets/articles";
 import CardArticle from "../../_assets/components/CardArticle";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
+import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata({ params }) {
+export async function generateStaticParams() {
+  return authors.map((author) => ({
+    authorId: author.slug,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { authorId: string };
+}) {
   const author = authors.find((author) => author.slug === params.authorId);
 
   return getSEOTags({
@@ -14,18 +26,26 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Author({ params }) {
+export default async function Author({
+  params,
+}: {
+  params: { authorId: string };
+}) {
+  const t = await getTranslations("blog");
   const author = authors.find((author) => author.slug === params.authorId);
   const articlesByAuthor = articles
     .filter((article) => article.author.slug === author.slug)
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).valueOf() - new Date(a.publishedAt).valueOf()
+    );
 
   return (
     <>
       <section className="max-w-3xl mx-auto flex flex-col md:flex-row gap-8 mt-12 mb-24 md:mb-32">
         <div>
           <p className="text-xs uppercase tracking-wide text-base-content/80 mb-2">
-            Authors
+            {t("authors")}
           </p>
           <h1 className="font-extrabold text-3xl lg:text-5xl tracking-tight mb-2">
             {author.name}
@@ -54,7 +74,7 @@ export default async function Author({ params }) {
                   href={social.url}
                   className="btn btn-square"
                   // Using a dark theme? -> className="btn btn-square btn-neutral"
-                  title={`Go to ${author.name} profile on ${social.name}`}
+                  title={t("goToProfile", { author: author.name, social: social.name })}
                   target="_blank"
                 >
                   {social.icon}
@@ -67,7 +87,7 @@ export default async function Author({ params }) {
 
       <section>
         <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-center mb-8 md:mb-12">
-          Most recent articles by {author.name}
+          {t("mostRecentBy", { author: author.name })}
         </h2>
 
         <div className="grid lg:grid-cols-2 gap-8">

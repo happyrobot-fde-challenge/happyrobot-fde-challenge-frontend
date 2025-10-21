@@ -1,7 +1,9 @@
+import type { JSX } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import BadgeCategory from "./BadgeCategory";
 import Avatar from "./Avatar";
+import { articleType } from "../types";
 
 // This is the article card that appears in the home page, in the category page, and in the author's page
 const CardArticle = ({
@@ -9,6 +11,11 @@ const CardArticle = ({
   tag = "h2",
   showCategory = true,
   isImagePriority = false,
+}: {
+  article: articleType;
+  tag?: keyof JSX.IntrinsicElements;
+  showCategory?: boolean;
+  isImagePriority?: boolean;
 }) => {
   const TitleTag = tag;
 

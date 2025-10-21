@@ -1,12 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
+import { articleType } from "../types";
+import { useTranslations } from "next-intl";
 
 // This is the author avatar that appears in the article page and in <CardArticle /> component
-const Avatar = ({ article }) => {
+const Avatar = ({ article }: { article: articleType }) => {
+  const t = useTranslations("blog");
+
   return (
     <Link
       href={`/blog/author/${article.author.slug}`}
-      title={`Posts by ${article.author.name}`}
+      title={t("postsBy", { author: article.author.name })}
       className="inline-flex items-center gap-2 group"
       rel="author"
     >

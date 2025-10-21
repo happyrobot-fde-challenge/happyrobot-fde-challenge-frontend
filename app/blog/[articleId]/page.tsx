@@ -1,12 +1,23 @@
 import Link from "next/link";
 import Script from "next/script";
-import { articles } from "../_assets/content";
+import { articles } from "../_assets/articles";
 import BadgeCategory from "../_assets/components/BadgeCategory";
 import Avatar from "../_assets/components/Avatar";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
+import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata({ params }) {
+export async function generateStaticParams() {
+  return articles.map((article) => ({
+    articleId: article.slug,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { articleId: string };
+}) {
   const article = articles.find((article) => article.slug === params.articleId);
 
   return getSEOTags({
@@ -32,7 +43,12 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Article({ params }) {
+export default async function Article({
+  params,
+}: {
+  params: { articleId: string };
+}) {
+  const t = await getTranslations("blog");
   const article = articles.find((article) => article.slug === params.articleId);
   const articlesRelated = articles
     .filter(
@@ -42,7 +58,10 @@ export default async function Article({ params }) {
           article.categories.map((c) => c.slug).includes(c.slug)
         )
     )
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).valueOf() - new Date(a.publishedAt).valueOf()
+    )
     .slice(0, 3);
 
   return (
@@ -78,7 +97,7 @@ export default async function Article({ params }) {
         <Link
           href="/blog"
           className="link !no-underline text-base-content/80 hover:text-base-content inline-flex items-center gap-1"
-          title="Back to Blog"
+          title={t("backToBlog")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +111,7 @@ export default async function Article({ params }) {
               clipRule="evenodd"
             />
           </svg>
-          Back to Blog
+          {t("backToBlog")}
         </Link>
       </div>
 
@@ -129,14 +148,14 @@ export default async function Article({ params }) {
           {/* SIDEBAR WITH AUTHORS AND 3 RELATED ARTICLES */}
           <section className="max-md:pb-4 md:pl-12 max-md:border-b md:border-l md:order-last md:w-72 shrink-0 border-base-content/10">
             <p className="text-base-content/80 text-sm mb-2 md:mb-3">
-              Posted by
+              {t("postedBy")}
             </p>
             <Avatar article={article} />
 
             {articlesRelated.length > 0 && (
               <div className="hidden md:block mt-12">
                 <p className=" text-base-content/80 text-sm  mb-2 md:mb-3">
-                  Related reading
+                  {t("relatedReading")}
                 </p>
                 <div className="space-y-2 md:space-y-5">
                   {articlesRelated.map((article) => (
